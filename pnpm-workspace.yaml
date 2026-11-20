@@ -1,0 +1,13 @@
+# Supply-chain hardening (pnpm >= 10.16)
+# Refuse package versions published less than 24h ago — most malicious
+# releases are caught and unpublished within that window.
+minimumReleaseAge: 1440
+
+# Dependency lifecycle scripts are blocked by default in pnpm 10.
+# Only packages listed under onlyBuiltDependencies may run install scripts;
+# fail the install if a new dependency wants to run one without review.
+strictDepBuilds: true
+
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
