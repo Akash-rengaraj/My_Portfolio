@@ -54,13 +54,12 @@ export function Heatmap({ days }: { days: readonly ContributionDay[] }) {
   return (
     <div className="[scrollbar-width:thin] overflow-x-auto pb-1" dir="rtl">
       <svg
-        dir="ltr"
         viewBox={`0 0 ${width} ${height}`}
         width={width}
         height={height}
         role="img"
         aria-label={`${days.reduce((sum, d) => sum + d.count, 0)} contributions in the last year`}
-        className="block"
+        className="block [direction:ltr]"
       >
         {labels.map((label) => (
           <text
