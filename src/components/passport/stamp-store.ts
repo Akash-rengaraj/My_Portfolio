@@ -10,16 +10,13 @@ const EVENT = "passport-stamps-change";
 /** Fallback when localStorage is unavailable. */
 let memory = "";
 
-function readRaw(): string {
+/** The stored list; the in-memory copy is used only when storage is blocked. */
+function snapshot(): string {
   try {
     return localStorage.getItem(KEY) ?? "";
   } catch {
-    return "";
+    return memory;
   }
-}
-
-function snapshot(): string {
-  return readRaw() || memory;
 }
 
 function write(ids: readonly StampId[]) {
