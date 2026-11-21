@@ -1,11 +1,36 @@
-import { siteConfig } from "@/config/site";
+import { CertificatesSection } from "@/components/certificates/certificates-section";
+import { ContactSection } from "@/components/contact/contact-section";
+import { DevHero } from "@/components/hero/dev-hero";
+import { JourneySection } from "@/components/journey/journey-section";
+import { StampCounter } from "@/components/passport/stamp-counter";
+import { AfterHoursSection } from "@/components/play/after-hours-section";
+import { SiteFooter } from "@/components/site/site-footer";
+import { StatsSection } from "@/components/stats/stats-section";
+import { ToolkitSection } from "@/components/toolkit/toolkit-section";
+import { WorksSection } from "@/components/works/works-section";
 
-/** Home page. Sections are added once the content plan is final. */
+/**
+ * Developer portfolio (default view): one world, eight places — the desk
+ * (hero story), the pinboard (works), the workbench (toolkit), the frame wall
+ * (certificates), the scoreboard (live stats), the road (journey) and after
+ * hours (the passport) and the door (contact) — then the sign-off. Each place hides a rubber stamp;
+ * the counter tracks the visitor's passport.
+ */
 export default function HomePage() {
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-4 px-6 py-24">
-      <h1 className="font-heading text-4xl font-semibold tracking-tight">{siteConfig.name}</h1>
-      <p className="text-lg text-muted-foreground">{siteConfig.description}</p>
-    </main>
+    <>
+      <main id="main" className="flex flex-1 flex-col">
+        <DevHero />
+        <WorksSection />
+        <ToolkitSection />
+        <CertificatesSection />
+        <StatsSection />
+        <JourneySection />
+        <AfterHoursSection />
+        <ContactSection />
+      </main>
+      <SiteFooter />
+      <StampCounter />
+    </>
   );
 }

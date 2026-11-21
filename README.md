@@ -48,6 +48,12 @@ src/
   test/           test setup
 ```
 
+## Hero assets
+
+The developer hero is a scroll-driven WebGL film built from locally generated photoreal plates.
+See [docs/design/2026-11-20-dev-hero.md](./docs/design/2026-11-20-dev-hero.md) for the story,
+the pipeline (`tools/hero-studio/`) and how to regenerate plates.
+
 ## Security
 
 See [SECURITY.md](./SECURITY.md). Short version: strict CSP and security headers on every route

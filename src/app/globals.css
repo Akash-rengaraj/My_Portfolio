@@ -4,6 +4,214 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Brand tokens. Light ("daylight desk") is the default; `.dark` on <html>
+ * switches to the night palette. Every section reads these, so a theme
+ * change repaints the whole site, hero SVG included.
+ */
+@theme inline {
+  --color-stage: var(--stage);
+  --color-stage-foreground: var(--stage-foreground);
+  --color-stage-muted: var(--stage-muted);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-tint: var(--tint);
+  --color-signal: var(--signal);
+  --color-cool: var(--cool);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-board: var(--board);
+  --color-blueprint: var(--blueprint);
+  --color-map: var(--map);
+  --font-hand: var(--font-caveat);
+}
+
+:root {
+  --stage: #f6f6f7;
+  --stage-foreground: #111113;
+  --stage-muted: #5b5b63;
+  --surface: #ffffff;
+  --line: rgb(17 17 19 / 0.11);
+  --line-strong: rgb(17 17 19 / 0.22);
+  --tint: rgb(17 17 19 / 0.04);
+  --signal: #e5480f;
+  --cool: #2f6be0;
+  --ok: #15803d;
+  --warn: #b7791f;
+  /* How much of a project/skill hue survives in text (rest is ink). */
+  --hue-ink: 58%;
+  /*
+   * Section "places": two neutral greys that alternate down the page
+   * (#f6f6f7 / #ededef), each with its own quiet pattern. No colour tints —
+   * colour is reserved for content and the single orange accent.
+   */
+  --board: #e9e9ec;
+  --board-dot: rgb(17 17 19 / 0.1);
+  --blueprint: #f6f6f7;
+  --blueprint-line: rgb(17 17 19 / 0.055);
+  --map: #f6f6f7;
+  --map-line: rgb(17 17 19 / 0.05);
+  --dusk-1: #f6f6f7;
+  --dusk-2: #ededef;
+  --shadow-ink: rgb(17 17 19 / 0.14);
+  /* Hero SVG */
+  --hero-grid: rgb(17 17 19 / 0.09);
+  --hero-panel: #ffffff;
+  --hero-panel-border: #dcdce0;
+  --hero-ui-text: #111113;
+  --hero-ui-muted: #6b6b73;
+  --hero-client: #6b6b73;
+  --hero-blob: #ebebed;
+  --hero-term: #f4f4f5;
+  --hero-tint: rgb(17 17 19 / 0.03);
+  --hero-glass-edge: #111113;
+  --hero-paper-shadow: rgb(17 17 19 / 0.2);
+  --hero-panel-shadow: rgb(17 17 19 / 0.12);
+}
+
+.dark {
+  --stage: #0a0a0b;
+  --stage-foreground: #ededef;
+  --stage-muted: #8e8e96;
+  --surface: #1c1c1f;
+  --line: rgb(255 255 255 / 0.1);
+  --line-strong: rgb(255 255 255 / 0.2);
+  --tint: rgb(255 255 255 / 0.045);
+  --signal: #ff5a1f;
+  --cool: #8ab4ff;
+  --ok: #4ade80;
+  --warn: #f5b84b;
+  --hue-ink: 100%;
+  --board: #111113;
+  --board-dot: rgb(255 255 255 / 0.07);
+  --blueprint: #0a0a0b;
+  --blueprint-line: rgb(255 255 255 / 0.04);
+  --map: #111113;
+  --map-line: rgb(255 255 255 / 0.035);
+  --dusk-1: #0a0a0b;
+  --dusk-2: #111113;
+  --shadow-ink: rgb(0 0 0 / 0.6);
+  --hero-grid: #ffffff12;
+  --hero-panel: #151517;
+  --hero-panel-border: #2a2a2f;
+  --hero-ui-text: #ededef;
+  --hero-ui-muted: #8e8e96;
+  --hero-client: #a3a3ab;
+  --hero-blob: #1a1a1d;
+  --hero-term: #0e0e10;
+  --hero-tint: #ffffff08;
+  --hero-glass-edge: #ffffff;
+  --hero-paper-shadow: rgb(0 0 0 / 0.5);
+  --hero-panel-shadow: rgb(0 0 0 / 0.55);
+}
+
+/* Dev Mode — unlocked by catching every bug. A green phosphor terminal skin. */
+.dev {
+  --stage: #020a04;
+  --stage-foreground: #b8ffbf;
+  --stage-muted: #4c9a57;
+  --surface: #031408;
+  --line: rgb(57 255 106 / 0.16);
+  --line-strong: rgb(57 255 106 / 0.32);
+  --tint: rgb(57 255 106 / 0.05);
+  --signal: #39ff6a;
+  --cool: #6dffb0;
+  --ok: #39ff6a;
+  --warn: #d6ff5c;
+  --board: #031006;
+  --board-dot: rgb(57 255 106 / 0.08);
+  --blueprint: #020d05;
+  --blueprint-line: rgb(57 255 106 / 0.07);
+  --map: #030f06;
+  --map-line: rgb(57 255 106 / 0.06);
+  --dusk-1: #04140a;
+  --dusk-2: #010603;
+  --shadow-ink: rgb(0 0 0 / 0.7);
+  --hero-grid: rgb(57 255 106 / 0.12);
+  --hero-panel: #041a0b;
+  --hero-panel-border: #0f4a1f;
+  --hero-ui-text: #b8ffbf;
+  --hero-ui-muted: #4c9a57;
+  --hero-client: #6dffb0;
+  --hero-blob: #062611;
+  --hero-term: #021007;
+  --hero-tint: rgb(57 255 106 / 0.04);
+  --hero-glass-edge: #39ff6a;
+  --hero-paper-shadow: rgb(0 0 0 / 0.6);
+  --hero-panel-shadow: rgb(0 0 0 / 0.65);
+}
+html.dev {
+  --font-geist-sans: var(--font-geist-mono);
+  --font-caveat: var(--font-geist-mono);
+}
+html.dev body {
+  text-shadow: 0 0 6px rgb(57 255 106 / 0.35);
+}
+/* CRT scanlines and a faint flicker over everything. */
+html.dev body::after {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.18) 0 1px, transparent 1px 3px);
+  mix-blend-mode: multiply;
+  animation: crt-flicker 4s steps(1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.dev body::after {
+    animation: none;
+  }
+}
+@keyframes crt-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  48% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/*
+ * Section backgrounds, page-level. Defined only on :root and html.dark (never
+ * on the bare .dark class) so a section inverted with class="dark" still
+ * reads the real values — that's what lets torn edges match their neighbour.
+ * Light mode alternates light → grey → DARK → light → DARK … for rhythm without
+ * colour; dark mode alternates two near-blacks.
+ */
+:root {
+  --bg-hero: #f6f6f7;
+  --bg-works: #e9e9ec;
+  --bg-toolkit: #111113;
+  --bg-certs: #f6f6f7;
+  --bg-stats: #111113;
+  --bg-journey: #f6f6f7;
+  --bg-play: #111113;
+  --bg-contact: #f6f6f7;
+  --bg-footer: #0a0a0b;
+}
+html.dark {
+  --bg-hero: #0a0a0b;
+  --bg-works: #111113;
+  --bg-toolkit: #0a0a0b;
+  --bg-certs: #111113;
+  --bg-stats: #0a0a0b;
+  --bg-journey: #111113;
+  --bg-play: #0a0a0b;
+  --bg-contact: #111113;
+  --bg-footer: #0a0a0b;
+}
+
+/* Text in a project's / skill's hue, darkened enough to read on light paper. */
+@utility text-hue {
+  color: color-mix(in oklab, var(--hue) var(--hue-ink), var(--stage-foreground));
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -122,7 +330,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-stage text-stage-foreground;
   }
   button:not(:disabled),
   [role="button"]:not(:disabled) {
@@ -130,5 +338,202 @@
   }
   html {
     @apply font-sans;
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  /* Nav links glide to their section (instant when motion is reduced). */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+/* Hero: near-layer dust drifts gently (disabled for reduced motion). */
+@keyframes hero-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(var(--dx), var(--dy), 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-hero-speck] {
+    animation: none !important;
+  }
+}
+
+/* Header brand caret. */
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Theme switch: the new theme spreads as a circle from the toggle. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) {
+  animation: theme-reveal 650ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0 at var(--vt-x, 50%) var(--vt-y, 0%));
+  }
+  to {
+    clip-path: circle(150vmax at var(--vt-x, 50%) var(--vt-y, 0%));
+  }
+}
+
+/* Small celebratory pieces (new best score, all levels cleared). */
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--cx), var(--cy), 0) rotate(var(--cr));
+    opacity: 0;
+  }
+}
+
+/* Journey: a little firework over Sivakasi when the traveller arrives. */
+@keyframes spark {
+  0% {
+    transform: rotate(var(--a)) translateY(-6px) scaleY(0.2);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--a)) translateY(-26px) scaleY(1);
+    opacity: 0;
+  }
+}
+
+/* Catch the Bugs: twitching legs, a nervous scurry, the squash and the cheer. */
+@keyframes bug-legs {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+@keyframes bug-scurry {
+  0%,
+  62%,
+  100% {
+    transform: translate(0, 0);
+  }
+  70% {
+    transform: translate(6px, -3px);
+  }
+  78% {
+    transform: translate(-4px, 2px);
+  }
+  86% {
+    transform: translate(2px, 0);
+  }
+}
+@keyframes bug-squash {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  40% {
+    transform: scale(1.35, 0.35);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.6, 0.15);
+    opacity: 0;
+  }
+}
+@keyframes bug-caught {
+  0% {
+    transform: translate(-50%, 6px);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -18px);
+    opacity: 0;
+  }
+}
+
+/* Fill the Passport: the hidden stamps bob, press, ink, and thunk into place. */
+@keyframes stamp-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(-4deg);
+  }
+}
+@keyframes stamp-press {
+  0% {
+    transform: translateY(-10px);
+  }
+  35% {
+    transform: translateY(4px) scale(1.05, 0.88);
+  }
+  55% {
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    transform: translateY(-14px);
+    opacity: 0;
+  }
+}
+@keyframes stamp-ink {
+  0%,
+  30% {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+  45% {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+}
+@keyframes stamp-thunk {
+  0% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes ticket-shine {
+  0% {
+    background-position: 120% 0;
+  }
+  60%,
+  100% {
+    background-position: -40% 0;
   }
 }

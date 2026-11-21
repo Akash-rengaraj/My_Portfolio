@@ -48,3 +48,6 @@ Thumbs.db
 
 # local tool output
 .playwright-mcp
+
+# brainstorming mockups
+.superpowers/
