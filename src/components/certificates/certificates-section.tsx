@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Dialog } from "radix-ui";
 import { useState } from "react";
 
@@ -19,6 +18,7 @@ import {
   type Certificate,
   type Issuer,
 } from "@/content/certificates";
+import { LoadingImage } from "@/components/ui/loading-image";
 
 const ISSUERS = issuerCounts(CERTIFICATES);
 const MONTHLY = byMonth(CERTIFICATES);
@@ -34,7 +34,7 @@ const LAST = MONTHLY.at(-1)?.month ?? "";
 
 function IssuerLogo({ issuer, size = 20 }: { issuer: Issuer; size?: number }) {
   return (
-    <Image
+    <LoadingImage
       src={ISSUER_LOGOS[issuer]}
       alt=""
       width={size}
@@ -54,7 +54,7 @@ function CertificateCard({ cert, onOpen }: { cert: Certificate; onOpen: () => vo
       className="group flex h-full w-full items-center gap-4 rounded-2xl border border-line bg-surface p-4 text-left shadow-[0_14px_30px_-24px_var(--shadow-ink)] transition-[translate,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-line-strong hover:shadow-[0_24px_40px_-26px_var(--shadow-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
     >
       <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-line bg-white">
-        <Image
+        <LoadingImage
           src={ISSUER_LOGOS[cert.issuer]}
           alt=""
           width={32}
@@ -120,7 +120,7 @@ function CertificateDialog({ cert, onClose }: { cert: Certificate | null; onClos
                 </Dialog.Close>
               </div>
               <div className="mt-5 overflow-hidden rounded-lg border border-line bg-white">
-                <Image
+                <LoadingImage
                   src={thumbFor(cert)}
                   alt={`${cert.title} certificate issued by ${cert.issuer}`}
                   width={900}

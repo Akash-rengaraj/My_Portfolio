@@ -10,6 +10,7 @@ import {
   type RefObject,
 } from "react";
 
+import { LoadingImage } from "@/components/ui/loading-image";
 import type { Project } from "@/content/projects";
 import { formatIndex, splitTitle, tiltFor } from "@/lib/works";
 
@@ -45,7 +46,7 @@ interface MediaProps {
 function TileMedia({ project, videoRef, onTime, onPlayingChange }: MediaProps) {
   const screen = (
     <>
-      <Image
+      <LoadingImage
         src={project.media.poster}
         alt=""
         fill

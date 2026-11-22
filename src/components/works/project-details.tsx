@@ -1,9 +1,8 @@
-import Image from "next/image";
-
 import type { Project } from "@/content/projects";
 import { formatIndex, splitTitle } from "@/lib/works";
 
 import { Lightbox } from "./lightbox";
+import { LoadingImage } from "@/components/ui/loading-image";
 
 const STEPS = ["challenge", "solution", "impact"] as const;
 
@@ -176,7 +175,7 @@ export function ProjectDetails({ project, index }: { project: Project; index: nu
             {project.gallery.map((image) => (
               <li key={image.src}>
                 <Lightbox image={image}>
-                  <Image
+                  <LoadingImage
                     src={image.src}
                     alt={image.alt}
                     width={image.width}

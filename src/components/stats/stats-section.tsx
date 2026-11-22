@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 import { HiddenStamp } from "@/components/passport/hidden-stamp";
 import { Lightbox } from "@/components/works/lightbox";
 import { ChapterMarker } from "@/components/world/chapter-marker";
@@ -17,6 +15,7 @@ import {
 
 import { CountUp } from "./count-up";
 import { Heatmap, HeatmapLegend } from "./heatmap";
+import { LoadingImage } from "@/components/ui/loading-image";
 
 const card =
   "relative overflow-hidden rounded-2xl border border-line bg-surface p-6 shadow-[0_18px_36px_-26px_var(--shadow-ink)] sm:p-7";
@@ -279,7 +278,7 @@ function HackathonCard() {
       </div>
       <div className="flex flex-col gap-3">
         <Lightbox image={hack.photo}>
-          <Image
+          <LoadingImage
             src={hack.photo.src}
             alt={hack.photo.alt}
             width={hack.photo.width}
@@ -291,7 +290,7 @@ function HackathonCard() {
         <div className="grid grid-cols-3 gap-3">
           {hack.gallery.map((photo) => (
             <Lightbox key={photo.src} image={photo}>
-              <Image
+              <LoadingImage
                 src={photo.src}
                 alt={photo.alt}
                 width={photo.width}

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 
+import { LoadingImage } from "@/components/ui/loading-image";
 import type { Project } from "@/content/projects";
 import { formatIndex, splitTitle, tiltFor } from "@/lib/works";
 
@@ -44,6 +45,8 @@ export function ProjectStage({ project, index, active }: ProjectStageProps) {
   const [userPlaying, setUserPlaying] = useState<boolean | null>(null);
   const reduced = useReducedMotion();
   const [playing, setPlaying] = useState(false);
+  /** True while playback is stalled waiting for video data. */
+  const [buffering, setBuffering] = useState(false);
   const [time, setTime] = useState({ current: 0, duration: 0 });
 
   const wantsPlay = userPlaying ?? !reduced;
@@ -153,6 +156,14 @@ export function ProjectStage({ project, index, active }: ProjectStageProps) {
               className={`relative overflow-hidden bg-black ${isPhone ? "rounded-[1.6rem]" : ""}`}
               style={{ aspectRatio: aspect }}
             >
+              {/* Poster with a skeleton until it loads; same URL as the video poster, so one download. */}
+              <LoadingImage
+                src={project.media.poster}
+                alt=""
+                fill
+                unoptimized
+                className="object-cover"
+              />
               <video
                 ref={videoRef}
                 src={project.media.video}
@@ -163,7 +174,13 @@ export function ProjectStage({ project, index, active }: ProjectStageProps) {
                 playsInline
                 preload="none"
                 onPlay={() => setPlaying(true)}
-                onPause={() => setPlaying(false)}
+                onPause={() => {
+                  setPlaying(false);
+                  setBuffering(false);
+                }}
+                onWaiting={() => setBuffering(true)}
+                onPlaying={() => setBuffering(false)}
+                onCanPlay={() => setBuffering(false)}
                 onTimeUpdate={(e) =>
                   setTime({
                     current: e.currentTarget.currentTime,
@@ -176,8 +193,11 @@ export function ProjectStage({ project, index, active }: ProjectStageProps) {
                     duration: e.currentTarget.duration,
                   })
                 }
-                className="size-full object-cover"
+                className="relative size-full object-cover"
               />
+              {buffering ? (
+                <span aria-hidden="true" className="skeleton absolute inset-0 opacity-50" />
+              ) : null}
             </div>
             {isPhone ? (
               <span

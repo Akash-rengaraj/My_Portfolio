@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { Dialog } from "radix-ui";
 import type { ReactNode } from "react";
+import { LoadingImage } from "@/components/ui/loading-image";
 
 interface LightboxProps {
   image: { src: string; alt: string; width: number; height: number };
@@ -27,7 +27,7 @@ export function Lightbox({ image, children }: LightboxProps) {
           className="fixed inset-4 z-[61] flex items-center justify-center outline-none sm:inset-10"
         >
           <Dialog.Title className="sr-only">{image.alt}</Dialog.Title>
-          <Image
+          <LoadingImage
             src={image.src}
             alt={image.alt}
             width={image.width}

@@ -537,3 +537,44 @@ html.dark {
     background-position: -40% 0;
   }
 }
+
+/*
+ * Skeleton loading. `.skeleton` is a shimmering placeholder block; media gets
+ * `data-loading="true"` until it has loaded, which paints the same shimmer
+ * behind it (an unloaded <img> is transparent, so the shimmer shows through).
+ */
+.skeleton,
+[data-loading="true"] {
+  background-color: color-mix(in srgb, var(--stage-foreground) 7%, var(--surface));
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in srgb, var(--stage-foreground) 9%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 250% 100%;
+  background-repeat: no-repeat;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+[data-loading="false"] {
+  animation: skeleton-reveal 0.45s ease-out;
+}
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+@keyframes skeleton-reveal {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton,
+  [data-loading] {
+    animation: none;
+  }
+}
