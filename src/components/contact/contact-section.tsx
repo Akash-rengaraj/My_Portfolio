@@ -11,6 +11,7 @@ import { PaperEdge } from "@/components/world/paper-edge";
 import { RESUME_FILE, RESUME_PATH } from "@/config/resume";
 import { author, contact } from "@/config/site";
 import {
+  buildGmailCompose,
   buildMailto,
   LIMITS,
   TOPICS,
@@ -139,7 +140,8 @@ function Postmark() {
 /**
  * "Let's build something" — chapter 08, the door. A postcard the visitor
  * writes to me: pick a topic, write a note, sign it, send. It's postmarked,
- * then opens in their own email app (a mailto: link — no server, nothing
+ * then opens Gmail's compose window in a new tab, pre-filled (no desktop email
+ * app needed; a mailto: link is offered as the fallback — no server, nothing
  * stored). Direct links sit alongside, with one-click copy for the email.
  */
 export function ContactSection() {
@@ -151,6 +153,7 @@ export function ContactSection() {
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<NoteErrors>({});
   const [posted, setPosted] = useState(false);
+  const [links, setLinks] = useState<{ gmail: string; mailto: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
   const send = (event: FormEvent<HTMLFormElement>) => {
@@ -158,11 +161,12 @@ export function ContactSection() {
     const found = validateNote({ name, message });
     setErrors(found);
     if (found.name || found.message) return;
+    const note = { name, topic, message, goldenTicket };
+    const gmail = buildGmailCompose(contact.email, note);
+    setLinks({ gmail, mailto: buildMailto(contact.email, note) });
     setPosted(true);
-    const href = buildMailto(contact.email, { name, topic, message, goldenTicket });
-    window.setTimeout(() => {
-      window.location.href = href;
-    }, 650);
+    // Opened synchronously inside the click so popup blockers allow it.
+    window.open(gmail, "_blank", "noopener,noreferrer");
   };
 
   const copyEmail = async () => {
@@ -335,9 +339,30 @@ export function ContactSection() {
               </form>
             </div>
             <p aria-live="polite" className="mt-4 min-h-5 text-sm text-stage-muted">
-              {posted
-                ? `Your email app should open with the note ready to send. If it didn't, write to ${contact.email}.`
-                : "Opens in your own email app, ready to send — nothing is stored here."}
+              {posted && links ? (
+                <>
+                  Gmail opened in a new tab with your note ready to send. Didn&apos;t open?{" "}
+                  <a
+                    href={links.gmail}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-stage-foreground underline underline-offset-4"
+                  >
+                    Open Gmail
+                  </a>
+                  {" · "}
+                  <a
+                    href={links.mailto}
+                    className="font-medium text-stage-foreground underline underline-offset-4"
+                  >
+                    use another email app
+                  </a>
+                  {" · or write to "}
+                  {contact.email}.
+                </>
+              ) : (
+                "Opens Gmail in a new tab, ready to send — nothing is stored here."
+              )}
             </p>
           </Reveal>
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildMailto, validateNote } from "./contact";
+import { buildGmailCompose, buildMailto, validateNote } from "./contact";
 
 describe("contact postcard", () => {
   it("asks for a name and a real message", () => {
@@ -32,5 +32,21 @@ describe("contact postcard", () => {
       goldenTicket: true,
     });
     expect(new URL(href).searchParams.get("body")).toMatch(/P\.S\. I filled the whole passport/);
+  });
+
+  it("builds a pre-filled Gmail compose link", () => {
+    const url = new URL(
+      buildGmailCompose("me@example.com", {
+        name: "Ada",
+        topic: "collab",
+        message: "Let's team up & ship it?",
+      }),
+    );
+    expect(url.origin).toBe("https://mail.google.com");
+    expect(url.pathname).toBe("/mail/");
+    expect(url.searchParams.get("view")).toBe("cm");
+    expect(url.searchParams.get("to")).toBe("me@example.com");
+    expect(url.searchParams.get("su")).toBe("Let's build something together — Ada");
+    expect(url.searchParams.get("body")).toBe("Hi Akash,\n\nLet's team up & ship it?\n\n— Ada");
   });
 });

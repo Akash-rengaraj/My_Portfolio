@@ -1,7 +1,7 @@
 /**
  * The contact postcard: no server, no third-party form service. The note is
- * turned into a `mailto:` link so it opens in the visitor's own email app
- * with everything filled in.
+ * turned into a Gmail compose link (opens in the browser, so it works without
+ * a desktop email app) with a `mailto:` link as the fallback for other apps.
  */
 
 export const TOPICS = [
@@ -42,13 +42,25 @@ export function validateNote(note: Pick<Note, "name" | "message">): NoteErrors {
   return errors;
 }
 
-/** The `mailto:` link for a note, with subject and body encoded. */
-export function buildMailto(to: string, note: Note): string {
+/** Subject line and plain-text body for a note. */
+export function composeNote(note: Note): { subject: string; body: string } {
   const topic = TOPICS.find((t) => t.id === note.topic) ?? TOPICS[3];
   const name = note.name.trim();
   const lines = ["Hi Akash,", "", note.message.trim(), "", `— ${name}`];
   if (note.goldenTicket)
     lines.push("", "P.S. I filled the whole passport and got the Golden Ticket.");
-  const subject = `${topic.subject} — ${name}`;
-  return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join("\n"))}`;
+  return { subject: `${topic.subject} — ${name}`, body: lines.join("\n") };
+}
+
+/** The `mailto:` link for a note, with subject and body encoded. */
+export function buildMailto(to: string, note: Note): string {
+  const { subject, body } = composeNote(note);
+  return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+/** Gmail's web compose window for a note, pre-filled and ready to send. */
+export function buildGmailCompose(to: string, note: Note): string {
+  const { subject, body } = composeNote(note);
+  const params = new URLSearchParams({ view: "cm", fs: "1", to, su: subject, body });
+  return `https://mail.google.com/mail/?${params.toString()}`;
 }
