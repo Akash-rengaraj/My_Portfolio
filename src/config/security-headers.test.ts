@@ -1,7 +1,14 @@
+import { getPathMatch } from "next/dist/shared/lib/router/utils/path-match";
 import { describe, expect, it } from "vitest";
 
 import nextConfig from "../../next.config";
-import { buildCspPolicy, buildSecurityHeaders, serializeCsp } from "./security-headers";
+import { RESUME_FILE, RESUME_PATH } from "./resume";
+import {
+  buildCspPolicy,
+  buildDocumentHeaders,
+  buildSecurityHeaders,
+  serializeCsp,
+} from "./security-headers";
 
 /** Look up a header value by name, failing the test if it is missing. */
 function getHeader(headers: { key: string; value: string }[], key: string): string {
@@ -73,11 +80,31 @@ describe("serializeCsp", () => {
 });
 
 describe("next.config", () => {
+  /** Header keys Next would send for `pathname`, using Next's own source matcher. */
+  async function headerKeysFor(pathname: string): Promise<string[]> {
+    const rules = (await nextConfig.headers?.()) ?? [];
+    return rules
+      .filter((rule) => getPathMatch(rule.source, { strict: true })(pathname) !== false)
+      .flatMap((rule) => rule.headers.map((h) => h.key));
+  }
+
   it("applies the security headers to every route", async () => {
-    const rules = await nextConfig.headers?.();
-    expect(rules).toBeDefined();
-    const catchAll = rules?.find((rule) => rule.source === "/:path*");
-    expect(catchAll?.headers.map((h) => h.key)).toContain("Content-Security-Policy");
+    for (const pathname of ["/", "/sitemap.xml", "/_next/static/chunk.js", "/works/x.png"]) {
+      const keys = await headerKeysFor(pathname);
+      expect(keys).toContain("Content-Security-Policy");
+      expect(keys).toContain("X-Frame-Options");
+    }
+  });
+
+  it("serves the résumé PDF inline with hardening but without the page CSP", async () => {
+    const keys = await headerKeysFor(RESUME_PATH);
+    expect(keys).not.toContain("Content-Security-Policy");
+    expect(keys).toContain("X-Content-Type-Options");
+    expect(keys).toContain("X-Frame-Options");
+
+    const headers = buildDocumentHeaders(false, RESUME_FILE);
+    expect(getHeader(headers, "Content-Type")).toBe("application/pdf");
+    expect(getHeader(headers, "Content-Disposition")).toBe(`inline; filename="${RESUME_FILE}"`);
   });
 
   it("hides the X-Powered-By header and disables browser source maps", () => {
