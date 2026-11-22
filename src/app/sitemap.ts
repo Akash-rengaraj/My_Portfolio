@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
 
+import { RESUME_PATH } from "@/config/resume";
 import { siteConfig } from "@/config/site";
 
 /** Public routes listed in the sitemap. Add each new page here. */
-const routes = ["/"] as const;
+const routes = ["/", RESUME_PATH] as const;
 
 /** sitemap.xml generated from `routes`. */
 export default function sitemap(): MetadataRoute.Sitemap {

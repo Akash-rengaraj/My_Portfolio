@@ -118,3 +118,18 @@ export function buildSecurityHeaders(isDev: boolean): Header[] {
 
   return headers;
 }
+
+/**
+ * Headers for a static document (the résumé PDF). Same hardening as pages, minus
+ * the page CSP — browser PDF viewers can be blocked by `object-src 'none'` /
+ * `default-src 'self'`. Served inline (view in the browser, download from its
+ * toolbar) and revalidated each request so a replaced file shows up immediately.
+ */
+export function buildDocumentHeaders(isDev: boolean, fileName: string): Header[] {
+  return [
+    ...buildSecurityHeaders(isDev).filter((header) => header.key !== "Content-Security-Policy"),
+    { key: "Content-Type", value: "application/pdf" },
+    { key: "Content-Disposition", value: `inline; filename="${fileName}"` },
+    { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
+  ];
+}

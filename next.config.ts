@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
-import { buildSecurityHeaders } from "./src/config/security-headers";
+import { RESUME_FILE, RESUME_PATH } from "./src/config/resume";
+import { buildDocumentHeaders, buildSecurityHeaders } from "./src/config/security-headers";
+
+/** `Akash_Rengaraj_Resume.pdf` with path-to-regexp specials (and dots) escaped. */
+const RESUME_PATTERN = RESUME_FILE.replace(/[.()[\]{}:*+?]/g, "\\$&");
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -30,8 +34,13 @@ const nextConfig: NextConfig = {
   headers() {
     return [
       {
-        source: "/:path*",
+        // Every path except the résumé PDF, which gets document headers below.
+        source: `/((?!${RESUME_PATTERN}$).*)`,
         headers: buildSecurityHeaders(isDev),
+      },
+      {
+        source: RESUME_PATH,
+        headers: buildDocumentHeaders(isDev, RESUME_FILE),
       },
     ];
   },

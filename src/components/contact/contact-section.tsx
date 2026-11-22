@@ -6,7 +6,9 @@ import { HiddenStamp } from "@/components/passport/hidden-stamp";
 import { TOTAL_STAMPS, useStamps } from "@/components/passport/stamp-store";
 import { Reveal } from "@/components/works/reveal";
 import { ChapterMarker } from "@/components/world/chapter-marker";
+import { ResumeIcon } from "@/components/site/resume-icon";
 import { PaperEdge } from "@/components/world/paper-edge";
+import { RESUME_FILE, RESUME_PATH } from "@/config/resume";
 import { author, contact } from "@/config/site";
 import {
   buildMailto,
@@ -371,6 +373,36 @@ export function ContactSection() {
                   <span aria-live="polite">{copied ? "copied ✓" : "copy"}</span>
                 </button>
                 <HiddenStamp id="door" className="absolute -top-4 -right-3" />
+              </div>
+
+              {/* Résumé: view in the browser or download */}
+              <div className="mt-3 flex flex-wrap items-center gap-4 rounded-xl border border-line p-4">
+                <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-signal/15 text-signal">
+                  <ResumeIcon className="size-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-mono text-[10px] tracking-[0.16em] text-stage-muted uppercase">
+                    résumé · pdf
+                  </p>
+                  <p className="truncate font-medium">{RESUME_FILE}</p>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <a
+                    href={RESUME_PATH}
+                    target="_blank"
+                    rel="noopener"
+                    className="rounded-full bg-stage-foreground px-3 py-1.5 font-mono text-[11px] tracking-[0.12em] text-stage uppercase transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
+                  >
+                    view ↗
+                  </a>
+                  <a
+                    href={RESUME_PATH}
+                    download={RESUME_FILE}
+                    className="rounded-full border border-line-strong px-3 py-1.5 font-mono text-[11px] tracking-[0.12em] uppercase transition-colors hover:border-signal hover:text-signal focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
+                  >
+                    download ↓
+                  </a>
+                </div>
               </div>
 
               {/* Socials */}

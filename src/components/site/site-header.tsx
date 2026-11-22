@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 
+import { RESUME_FILE, RESUME_PATH } from "@/config/resume";
 import { author } from "@/config/site";
 import { SECTIONS } from "@/content/sections";
 
+import { ResumeIcon } from "./resume-icon";
 import { ThemeToggle } from "./theme-toggle";
 import { useActiveSection } from "./use-active-section";
 
@@ -41,6 +43,25 @@ function PortfolioSwitch() {
         </li>
       </ul>
     </nav>
+  );
+}
+
+/**
+ * Opens the résumé PDF in a new tab (view there, download from the viewer).
+ * Phones have no room for it in the bar; it sits in the menu there instead.
+ */
+function ResumeLink() {
+  return (
+    <a
+      href={RESUME_PATH}
+      target="_blank"
+      rel="noopener"
+      title="View résumé (PDF)"
+      className="hidden h-9 items-center gap-2 rounded-full border border-line bg-tint px-3.5 font-mono text-[11px] tracking-[0.15em] text-stage-foreground uppercase backdrop-blur-sm transition-colors hover:border-signal/60 hover:text-signal focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal sm:flex"
+    >
+      <ResumeIcon />
+      resume
+    </a>
   );
 }
 
@@ -139,6 +160,7 @@ export function SiteHeader() {
 
         {/* Switch, theme and (below xl) the section menu */}
         <div className="flex shrink-0 items-center gap-2">
+          <ResumeLink />
           <PortfolioSwitch />
           <ThemeToggle />
           <div className="relative xl:hidden">
@@ -192,6 +214,26 @@ export function SiteHeader() {
                     ))}
                   </ul>
                 </nav>
+                <div className="mt-2 grid grid-cols-2 gap-1.5 border-t border-line pt-2">
+                  <a
+                    href={RESUME_PATH}
+                    target="_blank"
+                    rel="noopener"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 rounded-xl bg-stage-foreground px-3 py-2.5 font-mono text-[11px] tracking-[0.14em] text-stage uppercase focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-signal"
+                  >
+                    <ResumeIcon />
+                    resume
+                  </a>
+                  <a
+                    href={RESUME_PATH}
+                    download={RESUME_FILE}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 rounded-xl border border-line px-3 py-2.5 font-mono text-[11px] tracking-[0.14em] uppercase transition-colors hover:bg-tint focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-signal"
+                  >
+                    download ↓
+                  </a>
+                </div>
               </div>
             ) : null}
           </div>
