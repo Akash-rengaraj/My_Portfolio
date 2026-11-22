@@ -1,0 +1,24 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Next.js needs a running server (hourly "use cache" stats, image optimization,
+# security headers from next.config.ts), so this is a Web Service, not a Static Site.
+services:
+  - type: web
+    name: akashr-portfolio
+    runtime: node
+    region: singapore
+    # "free" sleeps after 15 min idle (~30–60 s cold start). Use "starter" to stay always on.
+    plan: free
+    branch: main
+    autoDeploy: true
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
+    startCommand: corepack enable && pnpm exec next start -H 0.0.0.0 -p $PORT
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      # Inlined at build time — redeploy after changing it.
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://www.akashr.dev
+    domains:
+      - www.akashr.dev
+      - akashr.dev
