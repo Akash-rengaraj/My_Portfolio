@@ -53,6 +53,3 @@ services:
       - path: /Akash_Rengaraj_Resume.pdf
         name: Cache-Control
         value: "public, max-age=0, must-revalidate"
-    domains:
-      - www.akashr.dev
-      - akashr.dev
