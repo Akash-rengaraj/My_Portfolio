@@ -19,6 +19,3 @@ services:
       # Inlined at build time — redeploy after changing it.
       - key: NEXT_PUBLIC_SITE_URL
         value: https://www.akashr.dev
-    domains:
-      - www.akashr.dev
-      - akashr.dev
