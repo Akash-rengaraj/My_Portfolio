@@ -1,16 +1,20 @@
 import type { NextConfig } from "next";
 
-import { RESUME_FILE, RESUME_PATH } from "./src/config/resume";
-import { buildDocumentHeaders, buildSecurityHeaders } from "./src/config/security-headers";
-
-/** `Akash_Rengaraj_Resume.pdf` with path-to-regexp specials (and dots) escaped. */
-const RESUME_PATTERN = RESUME_FILE.replace(/[.()[\]{}:*+?]/g, "\\$&");
-
-const isDev = process.env.NODE_ENV === "development";
-
+/**
+ * Built as a fully static site (`next build` → `out/`) and served by Render's
+ * static hosting / CDN, so there is no server to sleep or cold-start.
+ *
+ * Static export has no server, so:
+ * - HTTP security headers live in `render.yaml` (mirroring
+ *   `src/config/security-headers.ts`, kept in sync by a test), and the CSP is a
+ *   <meta> tag in the root layout.
+ * - Images are served as-is (no on-demand optimization).
+ * - No Cache Components / PPR (they need a server). Live stats are fetched at
+ *   build time; a scheduled GitHub Action redeploys daily to refresh them
+ *   (`.github/workflows/refresh-stats.yml`).
+ */
 const nextConfig: NextConfig = {
-  cacheComponents: true,
-  partialPrefetching: true,
+  output: "export",
   reactStrictMode: true,
   typedRoutes: true,
   // Don't advertise the framework in responses.
@@ -18,7 +22,8 @@ const nextConfig: NextConfig = {
   // Never ship source maps to the browser in production.
   productionBrowserSourceMaps: false,
   images: {
-    formats: ["image/avif", "image/webp"],
+    // No image-optimization server in a static export.
+    unoptimized: true,
     // Add explicit hostnames here when remote images are needed. Never use wildcards.
     remotePatterns: [],
     dangerouslyAllowSVG: false,
@@ -30,19 +35,6 @@ const nextConfig: NextConfig = {
         as: "*.css",
       },
     },
-  },
-  headers() {
-    return [
-      {
-        // Every path except the résumé PDF, which gets document headers below.
-        source: `/((?!${RESUME_PATTERN}$).*)`,
-        headers: buildSecurityHeaders(isDev),
-      },
-      {
-        source: RESUME_PATH,
-        headers: buildDocumentHeaders(isDev, RESUME_FILE),
-      },
-    ];
   },
 };
 

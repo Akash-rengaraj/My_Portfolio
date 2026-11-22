@@ -3,6 +3,9 @@ import type { MetadataRoute } from "next";
 import { RESUME_PATH } from "@/config/resume";
 import { siteConfig } from "@/config/site";
 
+/** Prerendered to a static file for the static export. */
+export const dynamic = "force-static";
+
 /** Public routes listed in the sitemap. Add each new page here. */
 const routes = ["/", RESUME_PATH] as const;
 

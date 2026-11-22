@@ -1,9 +1,11 @@
 /**
- * HTTP security headers applied to every route via `next.config.ts`.
+ * Security headers and CSP. The site is a static export served by Render, so
+ * the HTTP headers are declared in `render.yaml` (a test keeps it in sync with
+ * `buildHostHeaders` / `buildDocumentHeaders` here) and the CSP is a <meta> tag
+ * in the root layout (`buildMetaCsp`) — so it covers pages but never the PDF.
  *
  * The CSP is static (not nonce-based) on purpose: nonces force every page into
- * dynamic rendering and are incompatible with Partial Prerendering /
- * `cacheComponents`. A static policy keeps pages CDN-cacheable. The trade-off is
+ * dynamic rendering and can't work in a static export. The trade-off is
  * `'unsafe-inline'` for scripts, which Next.js needs for its inline RSC payload
  * scripts. Everything else is locked down to same-origin.
  *
@@ -70,13 +72,24 @@ export function buildCspPolicy(isDev: boolean): CspPolicy {
 }
 
 /** Serialize a CSP directive map into a header value. */
-export function serializeCsp(policy: CspPolicy, isDev: boolean): string {
+export function serializeCsp(policy: Partial<CspPolicy>, isDev: boolean): string {
   const directives = Object.entries(policy).map(
-    ([directive, sources]) => `${directive} ${sources.join(" ")}`,
+    ([directive, sources]) => `${directive} ${(sources ?? []).join(" ")}`,
   );
   // Upgrading on plain-http localhost breaks the dev server.
   if (!isDev) directives.push("upgrade-insecure-requests");
   return directives.join("; ");
+}
+
+/**
+ * CSP for the <meta http-equiv> tag in the root layout. `frame-ancestors` is
+ * dropped because browsers ignore it in <meta>; `X-Frame-Options: DENY` from
+ * the host covers framing instead.
+ */
+export function buildMetaCsp(isDev: boolean): string {
+  const policy: Partial<CspPolicy> = { ...buildCspPolicy(isDev) };
+  delete policy["frame-ancestors"];
+  return serializeCsp(policy, isDev);
 }
 
 /** Full list of security headers for the given environment. */
@@ -90,7 +103,7 @@ export function buildSecurityHeaders(isDev: boolean): Header[] {
       key: "Permissions-Policy",
       value: [
         "accelerometer=()",
-        "autoplay=()",
+        "autoplay=(self)",
         "browsing-topics=()",
         "camera=()",
         "display-capture=()",
@@ -119,16 +132,18 @@ export function buildSecurityHeaders(isDev: boolean): Header[] {
   return headers;
 }
 
+/** Headers the static host sends on every path: the full set minus the CSP (that's a <meta> tag). */
+export function buildHostHeaders(): Header[] {
+  return buildSecurityHeaders(false).filter((header) => header.key !== "Content-Security-Policy");
+}
+
 /**
- * Headers for a static document (the résumé PDF). Same hardening as pages, minus
- * the page CSP — browser PDF viewers can be blocked by `object-src 'none'` /
- * `default-src 'self'`. Served inline (view in the browser, download from its
- * toolbar) and revalidated each request so a replaced file shows up immediately.
+ * Extra headers for the résumé PDF, on top of `buildHostHeaders`: shown inline
+ * (view in the browser, download from its toolbar) and revalidated on every
+ * request so a replaced file shows up immediately.
  */
-export function buildDocumentHeaders(isDev: boolean, fileName: string): Header[] {
+export function buildDocumentHeaders(fileName: string): Header[] {
   return [
-    ...buildSecurityHeaders(isDev).filter((header) => header.key !== "Content-Security-Policy"),
-    { key: "Content-Type", value: "application/pdf" },
     { key: "Content-Disposition", value: `inline; filename="${fileName}"` },
     { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
   ];

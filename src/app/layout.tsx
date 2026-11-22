@@ -3,9 +3,12 @@ import { Caveat, Geist, Geist_Mono } from "next/font/google";
 
 import { SiteHeader } from "@/components/site/site-header";
 import { THEME_BOOT_SCRIPT } from "@/components/site/theme";
+import { buildMetaCsp } from "@/config/security-headers";
 import { siteConfig } from "@/config/site";
 
 import "./globals.css";
+
+const isDev = process.env.NODE_ENV === "development";
 
 // next/font self-hosts the files at build time, so CSP `font-src 'self'` holds.
 const geistSans = Geist({
@@ -76,6 +79,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <head>
+        {/* Static hosting can't vary headers per page, so the CSP ships as a meta tag. */}
+        <meta httpEquiv="Content-Security-Policy" content={buildMetaCsp(isDev)} />
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>
       <body className="flex min-h-full flex-col">

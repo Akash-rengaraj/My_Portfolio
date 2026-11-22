@@ -1,9 +1,8 @@
 /**
- * Live coding stats for the scoreboard, fetched on the server and cached
- * hourly with `"use cache"` — the page stays static, the browser never calls
- * these APIs (so no CSP changes), and a failed API just yields `null`.
+ * Live coding stats for the scoreboard, fetched at build time (the site is a
+ * static export; a daily scheduled redeploy refreshes them). The browser never
+ * calls these APIs (so no CSP changes), and a failed API just yields `null`.
  */
-import { cacheLife } from "next/cache";
 import { z } from "zod";
 
 const TIMEOUT_MS = 8000;
@@ -73,8 +72,6 @@ const LEETCODE_QUERY = `query stats($username: String!) {
 
 /** Solved counts by difficulty, ranking and streak. Null when LeetCode is unreachable. */
 export async function getLeetCodeStats(username: string): Promise<LeetCodeStats | null> {
-  "use cache";
-  cacheLife("hours");
   try {
     const res = await fetch("https://leetcode.com/graphql", {
       method: "POST",
@@ -144,8 +141,6 @@ export function parseContributions(json: unknown): Contributions | null {
 
 /** The last year of GitHub contributions. Null when the API is unreachable. */
 export async function getContributions(username: string): Promise<Contributions | null> {
-  "use cache";
-  cacheLife("hours");
   try {
     const res = await fetch(
       `https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(username)}?y=last`,
@@ -199,8 +194,6 @@ export function summarizeGitHub(user: unknown, repos: unknown): GitHubProfile | 
 
 /** Repo, star and follower counts plus top languages. Null when GitHub is unreachable. */
 export async function getGitHubProfile(username: string): Promise<GitHubProfile | null> {
-  "use cache";
-  cacheLife("hours");
   const init = {
     headers: { Accept: "application/vnd.github+json", "User-Agent": USER_AGENT },
     signal: AbortSignal.timeout(TIMEOUT_MS),

@@ -1,4 +1,6 @@
-import { getPathMatch } from "next/dist/shared/lib/router/utils/path-match";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import nextConfig from "../../next.config";
@@ -6,6 +8,8 @@ import { RESUME_FILE, RESUME_PATH } from "./resume";
 import {
   buildCspPolicy,
   buildDocumentHeaders,
+  buildHostHeaders,
+  buildMetaCsp,
   buildSecurityHeaders,
   serializeCsp,
 } from "./security-headers";
@@ -79,32 +83,65 @@ describe("serializeCsp", () => {
   });
 });
 
-describe("next.config", () => {
-  /** Header keys Next would send for `pathname`, using Next's own source matcher. */
-  async function headerKeysFor(pathname: string): Promise<string[]> {
-    const rules = (await nextConfig.headers?.()) ?? [];
-    return rules
-      .filter((rule) => getPathMatch(rule.source, { strict: true })(pathname) !== false)
-      .flatMap((rule) => rule.headers.map((h) => h.key));
-  }
+interface HostRule {
+  path: string;
+  name: string;
+  value: string;
+}
 
-  it("applies the security headers to every route", async () => {
-    for (const pathname of ["/", "/sitemap.xml", "/_next/static/chunk.js", "/works/x.png"]) {
-      const keys = await headerKeysFor(pathname);
-      expect(keys).toContain("Content-Security-Policy");
-      expect(keys).toContain("X-Frame-Options");
-    }
+/** The `headers:` rules from render.yaml (written as path / name / value triples). */
+function readRenderHeaders(): HostRule[] {
+  const yaml = readFileSync(join(process.cwd(), "render.yaml"), "utf8");
+  const unquote = (raw: string) => {
+    const value = raw.trim();
+    if (value.startsWith('"')) return JSON.parse(value) as string;
+    if (value.startsWith("'")) return value.slice(1, -1).replace(/''/g, "'");
+    return value;
+  };
+  return [...yaml.matchAll(/- path: (\S+)\n\s+name: (\S+)\n\s+value: (.+)/g)].map((m) => ({
+    path: m[1] ?? "",
+    name: m[2] ?? "",
+    value: unquote(m[3] ?? ""),
+  }));
+}
+
+describe("buildMetaCsp", () => {
+  it("is the production CSP minus frame-ancestors (ignored in <meta>)", () => {
+    const csp = buildMetaCsp(false);
+    expect(csp).not.toContain("frame-ancestors");
+    expect(csp).toContain("default-src 'self'");
+    expect(csp).toContain("object-src 'none'");
+    expect(csp).toContain("upgrade-insecure-requests");
+  });
+});
+
+describe("render.yaml (static hosting)", () => {
+  const rules = readRenderHeaders();
+
+  it("sends every host security header on every path, matching the code", () => {
+    const site = rules.filter((rule) => rule.path === "/*");
+    const expected = buildHostHeaders().map((h) => ({ name: h.key, value: h.value }));
+    expect(site.map(({ name, value }) => ({ name, value }))).toEqual(expected);
+    expect(site.some((rule) => rule.name === "Content-Security-Policy")).toBe(false);
   });
 
-  it("serves the résumé PDF inline with hardening but without the page CSP", async () => {
-    const keys = await headerKeysFor(RESUME_PATH);
-    expect(keys).not.toContain("Content-Security-Policy");
-    expect(keys).toContain("X-Content-Type-Options");
-    expect(keys).toContain("X-Frame-Options");
+  it("serves the résumé PDF inline, matching the code", () => {
+    const pdf = rules.filter((rule) => rule.path === RESUME_PATH);
+    const expected = buildDocumentHeaders(RESUME_FILE).map((h) => ({
+      name: h.key,
+      value: h.value,
+    }));
+    expect(pdf.map(({ name, value }) => ({ name, value }))).toEqual(expected);
+    expect(getHeader(buildDocumentHeaders(RESUME_FILE), "Content-Disposition")).toBe(
+      `inline; filename="${RESUME_FILE}"`,
+    );
+  });
+});
 
-    const headers = buildDocumentHeaders(false, RESUME_FILE);
-    expect(getHeader(headers, "Content-Type")).toBe("application/pdf");
-    expect(getHeader(headers, "Content-Disposition")).toBe(`inline; filename="${RESUME_FILE}"`);
+describe("next.config", () => {
+  it("builds a static export with unoptimized images", () => {
+    expect(nextConfig.output).toBe("export");
+    expect(nextConfig.images?.unoptimized).toBe(true);
   });
 
   it("hides the X-Powered-By header and disables browser source maps", () => {

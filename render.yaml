@@ -1,21 +1,58 @@
 # Render Blueprint — https://render.com/docs/blueprint-spec
-# Next.js needs a running server (hourly "use cache" stats, image optimization,
-# security headers from next.config.ts), so this is a Web Service, not a Static Site.
+# Static Site: `next build` exports plain files to out/, served from Render's CDN.
+# No server, so nothing sleeps or cold-starts, and it's free.
+#
+# Headers below mirror src/config/security-headers.ts (buildHostHeaders /
+# buildDocumentHeaders); a test fails if they drift. The CSP is a <meta> tag in
+# the root layout, so it covers pages but not the résumé PDF.
 services:
   - type: web
+    runtime: static
     name: akashr-portfolio
-    runtime: node
-    region: singapore
-    # "free" sleeps after 15 min idle (~30–60 s cold start). Use "starter" to stay always on.
-    plan: free
     branch: main
     autoDeploy: true
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
-    startCommand: corepack enable && pnpm exec next start -H 0.0.0.0 -p $PORT
-    healthCheckPath: /
+    staticPublishPath: out
     envVars:
       - key: NODE_VERSION
         value: "24"
       # Inlined at build time — redeploy after changing it.
       - key: NEXT_PUBLIC_SITE_URL
         value: https://www.akashr.dev
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: "nosniff"
+      - path: /*
+        name: X-Frame-Options
+        value: "DENY"
+      - path: /*
+        name: Referrer-Policy
+        value: "strict-origin-when-cross-origin"
+      - path: /*
+        name: Permissions-Policy
+        value: "accelerometer=(), autoplay=(self), browsing-topics=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+      - path: /*
+        name: Cross-Origin-Opener-Policy
+        value: "same-origin"
+      - path: /*
+        name: Cross-Origin-Resource-Policy
+        value: "same-origin"
+      - path: /*
+        name: X-Permitted-Cross-Domain-Policies
+        value: "none"
+      - path: /*
+        name: Origin-Agent-Cluster
+        value: "?1"
+      - path: /*
+        name: Strict-Transport-Security
+        value: "max-age=63072000; includeSubDomains"
+      - path: /Akash_Rengaraj_Resume.pdf
+        name: Content-Disposition
+        value: 'inline; filename="Akash_Rengaraj_Resume.pdf"'
+      - path: /Akash_Rengaraj_Resume.pdf
+        name: Cache-Control
+        value: "public, max-age=0, must-revalidate"
+    domains:
+      - www.akashr.dev
+      - akashr.dev

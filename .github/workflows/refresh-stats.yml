@@ -1,0 +1,30 @@
+name: Refresh live stats
+
+# The site is a static export, so GitHub / LeetCode stats are fetched at build
+# time. This triggers a Render redeploy once a day to keep them fresh.
+# Setup: Render → service → Settings → Deploy Hook → copy the URL, then add it
+# as the repo secret RENDER_DEPLOY_HOOK_URL (Settings → Secrets → Actions).
+
+on:
+  schedule:
+    - cron: "30 0 * * *" # 06:00 IST daily
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  redeploy:
+    name: Trigger Render deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call the deploy hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "::warning::RENDER_DEPLOY_HOOK_URL secret is not set; skipping."
+            exit 0
+          fi
+          curl --fail --silent --show-error --max-time 30 -X POST "$RENDER_DEPLOY_HOOK_URL" > /dev/null
+          echo "Deploy triggered."
