@@ -1,11 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, type CSSProperties, type PointerEvent, type RefObject } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent,
+  type RefObject,
+} from "react";
 
 import type { Project } from "@/content/projects";
 import { formatIndex, splitTitle, tiltFor } from "@/lib/works";
 
+import { useInView } from "./use-in-view";
 import { useReducedMotion } from "./use-reduced-motion";
 
 const MAX_TILT = 6;
@@ -30,10 +38,11 @@ interface MediaProps {
   project: Project;
   videoRef: RefObject<HTMLVideoElement | null>;
   onTime: (fraction: number) => void;
+  onPlayingChange: (playing: boolean) => void;
 }
 
 /** The project's real preview in its native device: a browser window or a phone. */
-function TileMedia({ project, videoRef, onTime }: MediaProps) {
+function TileMedia({ project, videoRef, onTime, onPlayingChange }: MediaProps) {
   const screen = (
     <>
       <Image
@@ -53,6 +62,11 @@ function TileMedia({ project, videoRef, onTime }: MediaProps) {
         preload="none"
         tabIndex={-1}
         data-playing="false"
+        onPlaying={(e) => {
+          e.currentTarget.dataset.playing = "true";
+          onPlayingChange(true);
+        }}
+        onPause={() => onPlayingChange(false)}
         onTimeUpdate={(e) => {
           const v = e.currentTarget;
           if (v.duration > 0) onTime(v.currentTime / v.duration);
@@ -116,8 +130,9 @@ function TileMedia({ project, videoRef, onTime }: MediaProps) {
 
 /**
  * One card pinned to the board: taped on slightly crooked, it straightens and
- * lifts when picked up, tilts toward the pointer with a glare, plays the live
- * preview (with a progress bar) on hover or focus, and opens the case study.
+ * lifts when picked up, tilts toward the pointer with a glare, and opens the
+ * case study. Its live preview autoplays inside the device frame (with a
+ * progress bar) while the card is on screen, and pauses when scrolled away.
  */
 export function ProjectTile({
   project,
@@ -130,35 +145,29 @@ export function ProjectTile({
   const cardRef = useRef<HTMLSpanElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressRef = useRef<HTMLSpanElement>(null);
+  const mediaRef = useRef<HTMLSpanElement>(null);
   const reduced = useReducedMotion();
+  const inView = useInView(mediaRef, "200px");
+  const [playing, setPlaying] = useState(false);
   const { name } = splitTitle(project.title);
   const shipped = project.status === "shipped";
   const chips = 4;
 
-  const play = () => {
-    onHover(project.slug);
+  // Autoplay (muted, looping) only while on screen; the poster stays for reduced motion.
+  useEffect(() => {
     const video = videoRef.current;
-    if (reduced || !video) return;
-    video.currentTime = 0;
-    void video.play().catch(() => undefined);
-    video.dataset.playing = "true";
-    cardRef.current?.setAttribute("data-playing", "true");
-  };
+    if (!video) return;
+    if (inView && !reduced) void video.play().catch(() => undefined);
+    else video.pause();
+  }, [inView, reduced]);
 
-  const stop = () => {
+  const resetTilt = () => {
     onHover(null);
-    const video = videoRef.current;
-    if (video) {
-      video.pause();
-      video.dataset.playing = "false";
-    }
     const card = cardRef.current;
     if (card) {
       card.style.transform = "";
-      card.removeAttribute("data-playing");
       card.style.setProperty("--glare", "0");
     }
-    progressRef.current?.style.setProperty("--p", "0");
   };
 
   const onMove = (event: PointerEvent<HTMLButtonElement>) => {
@@ -179,11 +188,11 @@ export function ProjectTile({
       aria-label={`Open case study: ${name}`}
       data-dim={dimmed}
       onClick={() => onOpen(project.slug)}
-      onPointerEnter={(event) => event.pointerType === "mouse" && play()}
-      onPointerLeave={stop}
+      onPointerEnter={(event) => event.pointerType === "mouse" && onHover(project.slug)}
+      onPointerLeave={resetTilt}
       onPointerMove={onMove}
-      onFocus={play}
-      onBlur={stop}
+      onFocus={() => onHover(project.slug)}
+      onBlur={resetTilt}
       style={
         {
           "--hue": project.hue,
@@ -220,12 +229,13 @@ export function ProjectTile({
         />
 
         {/* Media */}
-        <span aria-hidden="true" className="relative block p-3 pb-0">
+        <span ref={mediaRef} aria-hidden="true" className="relative block p-3 pb-0">
           <span className="relative block aspect-[16/10]">
             <TileMedia
               project={project}
               videoRef={videoRef}
               onTime={(fraction) => progressRef.current?.style.setProperty("--p", String(fraction))}
+              onPlayingChange={setPlaying}
             />
             {/* Rubber stamp: shipped, or still cooking */}
             <span
@@ -235,14 +245,18 @@ export function ProjectTile({
             >
               {shipped ? "shipped ✓" : "still cooking…"}
             </span>
-            <span className="absolute top-10 right-4 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/60 px-2.5 py-1 font-mono text-[10px] tracking-[0.16em] text-white/85 uppercase opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+            <span
+              data-on={playing}
+              className="absolute top-10 right-4 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/60 px-2.5 py-1 font-mono text-[10px] tracking-[0.16em] text-white/85 uppercase opacity-0 backdrop-blur-md transition-opacity duration-300 data-[on=true]:opacity-100"
+            >
               <span className="size-1.5 animate-pulse rounded-full bg-signal" />
-              {reduced ? "preview" : "playing"}
+              live
             </span>
             <span
               ref={progressRef}
+              data-on={playing}
               style={{ "--p": 0 } as CSSProperties}
-              className="absolute inset-x-3 bottom-2 z-10 h-0.5 overflow-hidden rounded-full bg-white/25 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              className="absolute inset-x-3 bottom-2 z-10 h-0.5 overflow-hidden rounded-full bg-white/25 opacity-0 transition-opacity duration-300 data-[on=true]:opacity-100"
             >
               <span className="block h-full w-full origin-left scale-x-[var(--p)] bg-[var(--hue)]" />
             </span>

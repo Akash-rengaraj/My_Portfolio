@@ -59,19 +59,20 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#f6f6f7" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0b" },
   ],
-  colorScheme: "light dark",
+  colorScheme: "dark light",
 };
 
 /**
- * Root layout: fonts, global styles and document shell. The inline script
- * applies a saved dark theme before paint (see `THEME_BOOT_SCRIPT`), which is
- * why <html> suppresses the class hydration warning.
+ * Root layout: fonts, global styles and document shell. Prerendered in the
+ * default dark theme; the inline script applies a saved light theme before
+ * paint (see `THEME_BOOT_SCRIPT`), which is why <html> suppresses the class
+ * hydration warning.
  */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${caveat.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${caveat.variable} dark h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

@@ -4,19 +4,20 @@ export const THEME_STORAGE_KEY = "theme";
 export const DEV_STORAGE_KEY = "dev-mode";
 
 /**
- * Runs inline in <head> before first paint, so a saved dark preference (or
- * Dev Mode, which rides on dark) never flashes light. Light is the default.
+ * Runs inline in <head> before first paint. The page is prerendered dark (the
+ * default); a saved light preference is applied here so it never flashes dark,
+ * and Dev Mode (which rides on dark) is restored.
  */
-export const THEME_BOOT_SCRIPT = `(function(){try{var c=document.documentElement.classList;if(localStorage.getItem("${THEME_STORAGE_KEY}")==="dark")c.add("dark");if(localStorage.getItem("${DEV_STORAGE_KEY}")==="on"){c.add("dark");c.add("dev")}}catch(e){}})()`;
+export const THEME_BOOT_SCRIPT = `(function(){try{var c=document.documentElement.classList;if(localStorage.getItem("${THEME_STORAGE_KEY}")==="light")c.remove("dark");else c.add("dark");if(localStorage.getItem("${DEV_STORAGE_KEY}")==="on"){c.add("dark");c.add("dev")}}catch(e){}})()`;
 
 /** The theme currently applied to <html>. */
 export function readTheme(): Theme {
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
-/** Server snapshot: pages are prerendered in the default light theme. */
+/** Server snapshot: pages are prerendered in the default dark theme. */
 export function readServerTheme(): Theme {
-  return "light";
+  return "dark";
 }
 
 /** Notifies `onChange` whenever the <html> class list changes. */
@@ -36,9 +37,9 @@ function store(key: string, value: string) {
 
 function savedTheme(): Theme {
   try {
-    return localStorage.getItem(THEME_STORAGE_KEY) === "dark" ? "dark" : "light";
+    return localStorage.getItem(THEME_STORAGE_KEY) === "light" ? "light" : "dark";
   } catch {
-    return "light";
+    return "dark";
   }
 }
 

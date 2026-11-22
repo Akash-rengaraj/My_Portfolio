@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Brand tokens. Light ("daylight desk") is the default; `.dark` on <html>
- * switches to the night palette. Every section reads these, so a theme
+ * Brand tokens. `.dark` on <html> (the default) is the night palette; without
+ * it, the light "daylight desk" palette. Every section reads these, so a theme
  * change repaints the whole site, hero SVG included (and the fixed nav).
  */
 @theme inline {

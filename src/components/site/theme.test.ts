@@ -16,7 +16,15 @@ afterEach(() => {
 });
 
 describe("theme", () => {
-  it("defaults to light", () => {
+  it("defaults to dark before paint when nothing is saved", () => {
+    new Function(THEME_BOOT_SCRIPT)();
+    expect(readTheme()).toBe("dark");
+  });
+
+  it("restores a saved light theme before paint", () => {
+    document.documentElement.classList.add("dark");
+    localStorage.setItem(THEME_STORAGE_KEY, "light");
+    new Function(THEME_BOOT_SCRIPT)();
     expect(readTheme()).toBe("light");
   });
 

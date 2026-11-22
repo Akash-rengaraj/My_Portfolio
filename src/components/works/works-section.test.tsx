@@ -87,7 +87,7 @@ describe("WorksSection (pinboard)", () => {
     expect(within(stats).getByText(/shipped/i)).toBeInTheDocument();
   });
 
-  it("lazy-loads tile previews: no video downloads until hovered", () => {
+  it("lazy-loads tile previews: no video downloads until scrolled into view", () => {
     const { container } = render(<WorksSection />);
     const videos = container.querySelectorAll("video");
     expect(videos.length).toBe(PROJECTS.length);
