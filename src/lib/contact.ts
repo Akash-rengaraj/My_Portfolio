@@ -4,6 +4,8 @@
  * a desktop email app) with a `mailto:` link as the fallback for other apps.
  */
 
+import { STAMP_IDS, ticketName, ticketSerial } from "@/content/stamps";
+
 export const TOPICS = [
   { id: "internship", label: "Internship / job", subject: "An opportunity for you" },
   { id: "freelance", label: "Freelance project", subject: "A project I'd like your help with" },
@@ -17,7 +19,7 @@ export interface Note {
   name: string;
   topic: TopicId;
   message: string;
-  /** True when the visitor filled the passport (adds a P.S.). */
+  /** True when the visitor filled the passport (adds their Golden Ticket as a P.S.). */
   goldenTicket?: boolean;
 }
 
@@ -42,14 +44,41 @@ export function validateNote(note: Pick<Note, "name" | "message">): NoteErrors {
   return errors;
 }
 
+/** Holder name and serial printed on a visitor's Golden Ticket. */
+export function ticketFor(name: string): { holder: string; serial: string } {
+  const clean = ticketName(name);
+  return { holder: clean || "You", serial: ticketSerial(clean || "guest") };
+}
+
+/**
+ * The Golden Ticket as plain text for the email, alongside the pasted image.
+ * The serial is derived from the name, so it can be checked with `ticketSerial`.
+ */
+export function ticketLines(name: string): string[] {
+  const { holder, serial } = ticketFor(name);
+  const rule = "━━━━━━━━━━━━━━━━━━━━━━━━━━";
+  return [
+    "P.S. I filled the whole passport — here's my Golden Ticket:",
+    "",
+    rule,
+    "🎟  ADMIT ONE · GOLDEN TICKET",
+    "Next stop: working with Akash",
+    "",
+    `Passenger: ${holder}`,
+    "From: anywhere · Valid: anytime",
+    `All ${STAMP_IDS.length} stamps ★  Serial ${serial}`,
+    rule,
+  ];
+}
+
 /** Subject line and plain-text body for a note. */
 export function composeNote(note: Note): { subject: string; body: string } {
   const topic = TOPICS.find((t) => t.id === note.topic) ?? TOPICS[3];
   const name = note.name.trim();
   const lines = ["Hi Akash,", "", note.message.trim(), "", `— ${name}`];
-  if (note.goldenTicket)
-    lines.push("", "P.S. I filled the whole passport and got the Golden Ticket.");
-  return { subject: `${topic.subject} — ${name}`, body: lines.join("\n") };
+  if (note.goldenTicket) lines.push("", ...ticketLines(name));
+  const subject = `${note.goldenTicket ? "🎟 " : ""}${topic.subject} — ${name}`;
+  return { subject, body: lines.join("\n") };
 }
 
 /** The `mailto:` link for a note, with subject and body encoded. */

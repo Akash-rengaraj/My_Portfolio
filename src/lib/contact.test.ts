@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { STAMP_IDS, ticketSerial } from "@/content/stamps";
+
 import { buildGmailCompose, buildMailto, validateNote } from "./contact";
 
 describe("contact postcard", () => {
@@ -24,14 +26,32 @@ describe("contact postcard", () => {
     expect(url.searchParams.get("body")).toBe("Hi Akash,\n\nCan you build our site?\n\n— Ada");
   });
 
-  it("adds a P.S. for Golden Ticket holders", () => {
+  it("adds the Golden Ticket to the email for passport holders", () => {
+    const url = new URL(
+      buildGmailCompose("me@example.com", {
+        name: "Ada",
+        topic: "hello",
+        message: "Hello there!",
+        goldenTicket: true,
+      }),
+    );
+    const body = url.searchParams.get("body") ?? "";
+    expect(url.searchParams.get("su")).toBe("🎟 Hello from your portfolio — Ada");
+    expect(body).toMatch(/P\.S\. I filled the whole passport/);
+    expect(body).toContain("ADMIT ONE · GOLDEN TICKET");
+    expect(body).toContain("Passenger: Ada");
+    expect(body).toContain(`All ${STAMP_IDS.length} stamps ★  Serial ${ticketSerial("Ada")}`);
+  });
+
+  it("leaves the ticket out for everyone else", () => {
     const href = buildMailto("me@example.com", {
       name: "Ada",
       topic: "hello",
-      message: "Hello there!",
-      goldenTicket: true,
+      message: "Hi!!!!!!!!",
     });
-    expect(new URL(href).searchParams.get("body")).toMatch(/P\.S\. I filled the whole passport/);
+    const url = new URL(href);
+    expect(url.searchParams.get("body")).not.toMatch(/GOLDEN TICKET/);
+    expect(url.searchParams.get("subject")).not.toMatch(/🎟/);
   });
 
   it("builds a pre-filled Gmail compose link", () => {

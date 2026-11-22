@@ -7,6 +7,7 @@ import { TOTAL_STAMPS, useStamps } from "@/components/passport/stamp-store";
 import { Reveal } from "@/components/works/reveal";
 import { ChapterMarker } from "@/components/world/chapter-marker";
 import { ResumeIcon } from "@/components/site/resume-icon";
+import { handOffTicket, type TicketHandoff } from "@/components/passport/ticket-image";
 import { PaperEdge } from "@/components/world/paper-edge";
 import { RESUME_FILE, RESUME_PATH } from "@/config/resume";
 import { author, contact } from "@/config/site";
@@ -14,6 +15,7 @@ import {
   buildGmailCompose,
   buildMailto,
   LIMITS,
+  ticketFor,
   TOPICS,
   validateNote,
   type NoteErrors,
@@ -154,6 +156,7 @@ export function ContactSection() {
   const [errors, setErrors] = useState<NoteErrors>({});
   const [posted, setPosted] = useState(false);
   const [links, setLinks] = useState<{ gmail: string; mailto: string } | null>(null);
+  const [ticket, setTicket] = useState<TicketHandoff | null>(null);
   const [copied, setCopied] = useState(false);
 
   const send = (event: FormEvent<HTMLFormElement>) => {
@@ -165,6 +168,12 @@ export function ContactSection() {
     const gmail = buildGmailCompose(contact.email, note);
     setLinks({ gmail, mailto: buildMailto(contact.email, note) });
     setPosted(true);
+    // Email links can't attach files, so the ticket image goes to the clipboard
+    // (or downloads) for pasting in. Started before the new tab takes focus.
+    if (goldenTicket) {
+      const { holder, serial } = ticketFor(name);
+      void handOffTicket(holder, serial).then(setTicket);
+    }
     // Opened synchronously inside the click so popup blockers allow it.
     window.open(gmail, "_blank", "noopener,noreferrer");
   };
@@ -325,7 +334,8 @@ export function ContactSection() {
                   </address>
                   {goldenTicket ? (
                     <p className="rounded-md bg-[#f3d77a]/60 px-2.5 py-1.5 text-xs font-medium">
-                      🎟 Golden Ticket holder — I&apos;ll add a P.S. for you.
+                      🎟 Golden Ticket holder — your ticket image comes along to paste into the
+                      email.
                     </p>
                   ) : null}
                   <button
@@ -359,6 +369,18 @@ export function ContactSection() {
                   </a>
                   {" · or write to "}
                   {contact.email}.
+                  {ticket === "copied" ? (
+                    <span className="mt-2 block font-medium text-stage-foreground">
+                      🎟 Your Golden Ticket image is copied — click into the email and press Ctrl+V
+                      (⌘V on Mac) to paste it in.
+                    </span>
+                  ) : null}
+                  {ticket === "saved" ? (
+                    <span className="mt-2 block font-medium text-stage-foreground">
+                      🎟 Your Golden Ticket image was downloaded — attach golden-ticket.png to the
+                      email.
+                    </span>
+                  ) : null}
                 </>
               ) : (
                 "Opens Gmail in a new tab, ready to send — nothing is stored here."
