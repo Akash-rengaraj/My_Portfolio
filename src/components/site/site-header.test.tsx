@@ -41,11 +41,18 @@ describe("SiteHeader", () => {
     expect(developer).toHaveAttribute("href", "/");
   });
 
-  it("shows the personal portfolio switch as coming soon", () => {
+  it("links to the personal portfolio", () => {
     render(<SiteHeader />);
-    const personal = screen.getByRole("button", { name: /personal/i });
-    expect(personal).toHaveAttribute("aria-disabled", "true");
-    expect(personal).toHaveTextContent(/soon/i);
+    const personal = screen.getByRole("link", { name: /personal/i });
+    expect(personal).toHaveAttribute("href", "/personal");
+    expect(personal).not.toHaveAttribute("aria-current");
+  });
+
+  it("marks the personal side current on /personal", () => {
+    route.pathname = "/personal";
+    render(<SiteHeader />);
+    expect(screen.getByRole("link", { name: /personal/i })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: /developer/i })).not.toHaveAttribute("aria-current");
   });
 
   it("links to every section of the page", () => {

@@ -7,7 +7,7 @@ import { siteConfig } from "@/config/site";
 export const dynamic = "force-static";
 
 /** Public routes listed in the sitemap. Add each new page here. */
-const routes = ["/", "/shop", RESUME_PATH] as const;
+const routes = ["/", "/personal", "/shop", RESUME_PATH] as const;
 
 /** sitemap.xml generated from `routes`. */
 export default function sitemap(): MetadataRoute.Sitemap {

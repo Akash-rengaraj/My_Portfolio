@@ -16,33 +16,37 @@ const SECTION_IDS = SECTIONS.map((s) => s.id);
 
 type SectionId = (typeof SECTION_IDS)[number];
 
-/** Developer / personal portfolio switch (personal is coming soon). */
-function PortfolioSwitch() {
+const switchLink =
+  "flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal aria-[current=page]:bg-stage-foreground aria-[current=page]:text-stage sm:px-4";
+
+/** Developer / personal portfolio switch; the side you're on is highlighted. */
+function PortfolioSwitch({ personal }: { personal: boolean }) {
   return (
     <nav aria-label="Portfolio">
       <ul className="flex items-center gap-1 rounded-full border border-line bg-tint p-1 font-mono text-[11px] tracking-[0.15em] uppercase backdrop-blur-sm">
         <li>
           <Link
             href="/"
-            aria-current="page"
-            className="flex items-center gap-2 rounded-full bg-stage-foreground px-3 py-1.5 text-stage focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal sm:px-4"
+            aria-current={personal ? undefined : "page"}
+            className={`${switchLink} text-stage-muted hover:text-stage-foreground`}
           >
-            <span aria-hidden="true" className="size-1.5 rounded-full bg-signal" />
+            {personal ? null : (
+              <span aria-hidden="true" className="size-1.5 rounded-full bg-signal" />
+            )}
             developer
           </Link>
         </li>
         <li>
-          <button
-            type="button"
-            aria-disabled="true"
-            title="Personal portfolio — coming soon"
-            className="flex cursor-not-allowed items-center gap-2 rounded-full px-3 py-1.5 tracking-[0.15em] text-stage-muted uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal sm:px-4"
+          <Link
+            href="/personal"
+            aria-current={personal ? "page" : undefined}
+            className={`${switchLink} text-stage-muted hover:text-stage-foreground`}
           >
+            {personal ? (
+              <span aria-hidden="true" className="size-1.5 rounded-full bg-signal" />
+            ) : null}
             personal
-            <span className="hidden rounded-full border border-line px-1.5 py-px text-[9px] tracking-[0.1em] text-stage-muted/80 sm:inline">
-              soon
-            </span>
-          </button>
+          </Link>
         </li>
       </ul>
     </nav>
@@ -117,7 +121,7 @@ export function SiteHeader() {
 
   return (
     <header
-      data-scrolled={scrolled}
+      data-scrolled={scrolled || pathname === "/personal"}
       className="fixed inset-x-0 top-0 z-50 border-b border-transparent transition-[background-color,border-color] duration-300 data-[scrolled=true]:border-line data-[scrolled=true]:bg-stage/80 data-[scrolled=true]:backdrop-blur-md"
     >
       <a
@@ -168,7 +172,7 @@ export function SiteHeader() {
         {/* Switch, theme and (below xl) the section menu */}
         <div className="flex shrink-0 items-center gap-2">
           <ResumeLink />
-          <PortfolioSwitch />
+          <PortfolioSwitch personal={pathname === "/personal"} />
           <ThemeToggle />
           <div className="relative xl:hidden">
             <button
