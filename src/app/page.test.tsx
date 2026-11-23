@@ -8,6 +8,11 @@ import HomePage from "./page";
 // The scoreboard is an async server component that fetches live stats; it has
 // its own tests, so the page test renders without it.
 vi.mock("@/components/stats/stats-section", () => ({ StatsSection: () => null }));
+// The shop door walks in with the app router, which isn't mounted in tests.
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+  usePathname: () => "/",
+}));
 
 describe("HomePage", () => {
   it("renders the site name as the only h1", () => {

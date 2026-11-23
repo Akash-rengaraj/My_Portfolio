@@ -1,10 +1,13 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { author } from "@/config/site";
 import { SECTIONS } from "@/content/sections";
 
 import { SiteHeader } from "./site-header";
+
+const { route } = vi.hoisted(() => ({ route: { pathname: null as string | null } }));
+vi.mock("next/navigation", () => ({ usePathname: () => route.pathname }));
 
 function scrollTo(y: number) {
   Object.defineProperty(window, "scrollY", { value: y, configurable: true });
@@ -13,7 +16,10 @@ function scrollTo(y: number) {
   });
 }
 
-afterEach(() => scrollTo(0));
+afterEach(() => {
+  scrollTo(0);
+  route.pathname = null;
+});
 
 describe("SiteHeader", () => {
   it("links the brand home, named after the owner", () => {
@@ -49,6 +55,18 @@ describe("SiteHeader", () => {
       expect(within(sections).getByRole("link", { name: section.label })).toHaveAttribute(
         "href",
         `#${section.id}`,
+      );
+    }
+  });
+
+  it("leads section links back to the home page from other pages", () => {
+    route.pathname = "/shop";
+    render(<SiteHeader />);
+    const sections = screen.getAllByRole("navigation", { name: /sections/i })[0]!;
+    for (const section of SECTIONS) {
+      expect(within(sections).getByRole("link", { name: section.label })).toHaveAttribute(
+        "href",
+        `/#${section.id}`,
       );
     }
   });

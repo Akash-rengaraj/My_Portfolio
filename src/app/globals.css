@@ -188,6 +188,7 @@ html.dev body::after {
   --bg-hero: #f6f6f7;
   --bg-works: #e9e9ec;
   --bg-toolkit: #111113;
+  --bg-shop: #e9e9ec;
   --bg-certs: #f6f6f7;
   --bg-stats: #111113;
   --bg-journey: #f6f6f7;
@@ -199,6 +200,7 @@ html.dark {
   --bg-hero: #0a0a0b;
   --bg-works: #111113;
   --bg-toolkit: #0a0a0b;
+  --bg-shop: #161618;
   --bg-certs: #111113;
   --bg-stats: #0a0a0b;
   --bg-journey: #111113;

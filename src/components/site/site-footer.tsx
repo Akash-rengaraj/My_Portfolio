@@ -5,6 +5,7 @@ const LINKS = [
   { href: "#hero", label: "the desk" },
   { href: "#works", label: "the pinboard" },
   { href: "#toolkit", label: "the workbench" },
+  { href: "#shop", label: "the shop" },
   { href: "#certifications", label: "the frame wall" },
   { href: "#scoreboard", label: "the scoreboard" },
   { href: "#journey", label: "the road" },

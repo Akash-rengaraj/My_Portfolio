@@ -176,7 +176,7 @@ export function CertificatesSection() {
           "repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 160px)",
       }}
     >
-      <PaperEdge colorClass="text-[var(--bg-toolkit)]" />
+      <PaperEdge colorClass="text-[var(--bg-shop)]" />
       <div className="mx-auto w-full max-w-[110rem] px-6 pt-28 pb-24 sm:px-10 md:pt-36 md:pb-32 xl:px-14">
         <Reveal>
           <div className="max-w-3xl">

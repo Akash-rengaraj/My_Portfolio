@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { RESUME_FILE, RESUME_PATH } from "@/config/resume";
@@ -12,6 +13,8 @@ import { ThemeToggle } from "./theme-toggle";
 import { useActiveSection } from "./use-active-section";
 
 const SECTION_IDS = SECTIONS.map((s) => s.id);
+
+type SectionId = (typeof SECTION_IDS)[number];
 
 /** Developer / personal portfolio switch (personal is coming soon). */
 function PortfolioSwitch() {
@@ -72,6 +75,10 @@ function ResumeLink() {
  */
 export function SiteHeader() {
   const active = useActiveSection(SECTION_IDS);
+  // Off the home page (e.g. inside the shop), section links lead back to it.
+  const pathname = usePathname();
+  const away = pathname !== null && pathname !== "/";
+  const sectionHref = (id: SectionId) => (away ? `/#${id}` : `#${id}`);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
@@ -146,7 +153,7 @@ export function SiteHeader() {
               return (
                 <li key={section.id}>
                   <a
-                    href={`#${section.id}`}
+                    href={sectionHref(section.id)}
                     aria-current={current ? "location" : undefined}
                     className="relative block rounded-full px-3.5 py-1.5 text-[13px] font-medium text-stage-foreground/70 transition-colors hover:text-stage-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal aria-[current=location]:bg-stage-foreground aria-[current=location]:text-stage"
                   >
@@ -200,7 +207,7 @@ export function SiteHeader() {
                     {SECTIONS.map((section, i) => (
                       <li key={section.id}>
                         <a
-                          href={`#${section.id}`}
+                          href={sectionHref(section.id)}
                           aria-current={section.id === active ? "location" : undefined}
                           onClick={() => setMenuOpen(false)}
                           className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-stage-foreground/80 transition-colors hover:bg-tint hover:text-stage-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-signal aria-[current=location]:bg-stage-foreground aria-[current=location]:text-stage"
