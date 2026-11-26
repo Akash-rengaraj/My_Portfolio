@@ -14,6 +14,7 @@ import {
   issuerCounts,
   pdfFor,
   thumbFor,
+  verifySite,
   verifyUrl,
   type Certificate,
   type Issuer,
@@ -145,7 +146,7 @@ function CertificateDialog({ cert, onClose }: { cert: Certificate | null; onClos
                     rel="noopener noreferrer"
                     className="inline-flex h-11 items-center gap-2 rounded-full border border-line-strong px-5 font-mono text-xs tracking-[0.14em] uppercase transition-colors hover:border-signal hover:text-signal focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal"
                   >
-                    verify on coursera ↗
+                    verify on {verifySite(cert)} ↗
                   </a>
                 ) : null}
               </div>

@@ -1,22 +1,23 @@
 /**
- * Certifications, from the course certificates themselves (issue dates and
- * Coursera verification IDs are read off each PDF). Files live in
+ * Certifications, from the certificates themselves (issue dates and
+ * Coursera / HackerRank / NPTEL verification IDs are read off each PDF). Files live in
  * /public/certificates; previews in /public/certificates/thumbs.
  */
 
-export type Issuer = "Google" | "Meta" | "IBM" | "Atlassian" | "NPTEL";
+export type Issuer = "Google" | "Meta" | "IBM" | "Atlassian" | "NPTEL" | "HackerRank";
 
 export interface Certificate {
   slug: string;
   title: string;
   issuer: Issuer;
   /** What it's about, for grouping. */
-  area: "Front-end" | "Version control" | "Cybersecurity" | "AI" | "Python";
+  area:
+    "Community" | "Databases" | "Front-end" | "Version control" | "Cybersecurity" | "AI" | "Python";
   /** ISO month the certificate was issued (or the course ended). */
   issued: string;
   /** Shown as-is on the card. */
   issuedLabel: string;
-  /** Coursera verification code, when there is one. */
+  /** Coursera, HackerRank or NPTEL verification code, when there is one. */
   verifyId?: string;
   /** Extra line under the title (e.g. a score). */
   note?: string;
@@ -28,9 +29,59 @@ export const ISSUER_LOGOS: Record<Issuer, string> = {
   IBM: "/certificates/logos/ibm.webp",
   Atlassian: "/certificates/logos/atlassian.webp",
   NPTEL: "/certificates/logos/nptel.webp",
+  HackerRank: "/certificates/logos/hackerrank.webp",
 };
 
 export const CERTIFICATES: readonly Certificate[] = [
+  {
+    slug: "google-student-ambassador-semester-1",
+    title: "Google Student Ambassador — Semester 1",
+    issuer: "Google",
+    area: "Community",
+    issued: "2026-11",
+    issuedLabel: "Nov 2026",
+    note: "Certificate of Participation · GSA Program 2026",
+  },
+  {
+    slug: "sql-intermediate",
+    title: "SQL (Intermediate)",
+    issuer: "HackerRank",
+    area: "Databases",
+    issued: "2026-11",
+    issuedLabel: "Nov 2026",
+    verifyId: "004CFE596C72",
+    note: "HackerRank skill certification test",
+  },
+  {
+    slug: "sql-basic",
+    title: "SQL (Basic)",
+    issuer: "HackerRank",
+    area: "Databases",
+    issued: "2026-11",
+    issuedLabel: "Nov 2026",
+    verifyId: "6D37259F860F",
+    note: "HackerRank skill certification test",
+  },
+  {
+    slug: "applied-accelerated-artificial-intelligence",
+    title: "Applied Accelerated Artificial Intelligence",
+    issuer: "NPTEL",
+    area: "AI",
+    issued: "2026-10",
+    issuedLabel: "Jul – Oct 2026",
+    verifyId: "NOC-F3Q4-DNE2-EC6H6",
+    note: "Elite · 12-week course, IIT Guwahati · score 73",
+  },
+  {
+    slug: "reinforcement-learning",
+    title: "Reinforcement Learning",
+    issuer: "NPTEL",
+    area: "AI",
+    issued: "2026-10",
+    issuedLabel: "Jul – Oct 2026",
+    verifyId: "NOC-SS8C-DA6J-PJD16",
+    note: "12-week course, IIT Madras · score 55",
+  },
   {
     slug: "react-basics",
     title: "React Basics",
@@ -143,8 +194,30 @@ export const CERTIFICATES: readonly Certificate[] = [
 
 export const pdfFor = (cert: Certificate) => `/certificates/${cert.slug}.pdf`;
 export const thumbFor = (cert: Certificate) => `/certificates/thumbs/${cert.slug}.webp`;
-export const verifyUrl = (cert: Certificate) =>
-  cert.verifyId ? `https://coursera.org/verify/${cert.verifyId}` : null;
+/** Where the certificate can be verified: HackerRank, NPTEL or Coursera, by issuer. */
+export function verifyUrl(cert: Certificate): string | null {
+  if (!cert.verifyId) return null;
+  switch (cert.issuer) {
+    case "HackerRank":
+      return `https://www.hackerrank.com/certificates/${cert.verifyId.toLowerCase()}`;
+    case "NPTEL":
+      return `https://nptel.ac.in/verify/${cert.verifyId}`;
+    default:
+      return `https://coursera.org/verify/${cert.verifyId}`;
+  }
+}
+
+/** Name of the site that hosts the verification page. */
+export function verifySite(cert: Certificate): string {
+  switch (cert.issuer) {
+    case "HackerRank":
+      return "hackerrank";
+    case "NPTEL":
+      return "nptel";
+    default:
+      return "coursera";
+  }
+}
 
 /** Issuers in order of how many certificates each gave, with counts. */
 export function issuerCounts(certs: readonly Certificate[]): { issuer: Issuer; count: number }[] {

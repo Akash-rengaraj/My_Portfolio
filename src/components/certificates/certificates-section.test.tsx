@@ -9,7 +9,7 @@ describe("CertificatesSection", () => {
   it("shows a card for every certificate", () => {
     render(<CertificatesSection />);
     expect(screen.getByRole("heading", { level: 2, name: /certifications/i })).toBeInTheDocument();
-    expect(frames()).toHaveLength(12);
+    expect(frames()).toHaveLength(17);
   });
 
   it("opens a certificate with its PDF and verification link", () => {
